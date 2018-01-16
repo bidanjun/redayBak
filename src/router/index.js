@@ -9,7 +9,11 @@ export class Router extends React.Component {
         let routes = Object.keys(this.props.routes).map((route) => {
             return { route : new routeParser(route), handler : this.props.routes[route] }
         })
-        this.state = { url : window.location.hash.slice(1), routes : routes }
+        this.state = {
+          url : window.location.hash.slice(1),
+          transitioning:false,
+          routes : routes 
+        }
     }
     render() {
         return this.getComponent() 
@@ -22,6 +26,33 @@ export class Router extends React.Component {
             return def
         },<div>404 not found</div>)
     }
+
+    navigated() {
+      // Strip leading and trailing '/'
+      let normalizedHash = window.location.hash.replace(/^#\/?|\/$/g, '');
+    
+      if (normalizedHash === '') {
+        // Redirect for default route
+        this.goto('/')
+      }
+      else {
+        // Otherwise update our application state
+        this.setState({location: normalizedHash.split('/'), transitioning: false});
+      }
+    }
+
+    goto(newURI) {
+      let currentURI = window.location.hash.substr(1);
+    
+      if (currentURI !== newURI) {
+        this.setState({transitioning: true});
+    
+        window.location.replace(
+          window.location.pathname + window.location.search + '#' + newURI
+        );
+      }
+    }
+
     createElement(Handler, props) {
         return <Handler {...this.props} {...props} />
     }
@@ -34,9 +65,9 @@ export class Router extends React.Component {
     }
     componentWillUnmount() {
         this._mounted = false
-        window.removeEventListener('hashchange', this.updateState.bind(this)) 
+        window.removeEventListener('hashchange', this.navigated.bind(this),false) 
     }
 }
 
-export default registerState('router',store)(Router)
+export default registerState('router',store,(comp)=>{comp.state.goto=comp.goto.bind(comp)})(Router)
 

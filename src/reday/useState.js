@@ -1,5 +1,4 @@
 import React from 'react'
-import {store} from './'
 
 export const isFunction = fn => (typeof fn === 'function');
 
