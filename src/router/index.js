@@ -27,20 +27,6 @@ export class Router extends React.Component {
         },<div>404 not found</div>)
     }
 
-    navigated() {
-      // Strip leading and trailing '/'
-      let normalizedHash = window.location.hash.replace(/^#\/?|\/$/g, '');
-    
-      if (normalizedHash === '') {
-        // Redirect for default route
-        this.goto('/')
-      }
-      else {
-        // Otherwise update our application state
-        this.setState({location: normalizedHash.split('/'), transitioning: false});
-      }
-    }
-
     goto(newURI) {
       let currentURI = window.location.hash.substr(1);
     
@@ -51,21 +37,25 @@ export class Router extends React.Component {
           window.location.pathname + window.location.search + '#' + newURI
         );
       }
+      console.log('goto')
     }
 
     createElement(Handler, props) {
         return <Handler {...this.props} {...props} />
     }
     updateState() {
-        if (this._mounted) this.setState({ url : window.location.hash.slice(1) })
+        if (this._mounted ) this.setState({
+          url : window.location.hash.slice(1),
+          transitioning: false
+        })
     }
     componentDidMount() {
         this._mounted = true
-        window.addEventListener('hashchange', this.updateState.bind(this))
+        window.addEventListener('hashchange', this.updateState.bind(this),false)
     }
     componentWillUnmount() {
         this._mounted = false
-        window.removeEventListener('hashchange', this.navigated.bind(this),false) 
+        window.removeEventListener('hashchange', this.updateState.bind(this),false) 
     }
 }
 

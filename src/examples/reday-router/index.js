@@ -4,12 +4,12 @@ import { store } from '../../reday';
 import HashRouter from '../../router'
 
 const HomePage = ()=>(<h2> Home Page </h2>)
-const BlogPage = ()=>(<h2> Blog Page </h2>)
+const BlogPage = ({id})=>(<h2> Blog Page {id} </h2>)
 
 let routerList={
     '/': HomePage,
     '/Home': HomePage,
-    '/Blog':BlogPage
+    '/Blog/:id':BlogPage
 };
 
 export default (props) => {
@@ -18,7 +18,7 @@ export default (props) => {
       <h2>Router Example</h2>
 
       <button onClick={e => store.router.goto('/Home')} children='Home' />
-      <button onClick={e => store.router.goto('/Blog')} children='Blog' />
+      <button onClick={e => store.router.goto('/Blog/1')} children='Blog' />
       <button onClick={e => store.router.goto('/Post')} children='NotFound' />
       <div>
         <HashRouter routes={routerList} />
