@@ -10,16 +10,14 @@ expect.addSnapshotSerializer(serializer)
 
 const increment = state => ({ counter: state.counter + 1 })
 test('state should be update when click', () => {
-  const wrapper = mount(
-    <div>
-    {makeState({ counter: 0 }, 'Counter', store)(
-      () => (
-        <button onClick={() => store.Counter.setState(increment)}>{store.Counter.counter}</button>
-      )
-    )}
-    </div>
+
+  const comp = makeState({ counter: 0 }, 'Counter', store)(
+    () => (
+      <button onClick={() => store.Counter.setState(increment)}>{store.Counter.counter}</button>
+    )
   )
-  expect(wrapper).toMatchSnapshot(`counte=0`)
-  wrapper.find('button').simulate('click')
-  expect(wrapper).toMatchSnapshot(`after click,counter=1`)
+  const wrapper = mount(<comp />)
+  expect(wrapper).toMatchSnapshot(`before click ,counte is 0,result is:`)
+  wrapper.find('comp').simulate('click')
+  expect(wrapper).toMatchSnapshot(`after click,counter=1,result is:`)
 })

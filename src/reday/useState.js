@@ -35,4 +35,3 @@ export default (mapProps = null) => Component => {
   UseState.displayName = `UseState(${Component.name || Component.displayName})`;
   return UseState
 }
-

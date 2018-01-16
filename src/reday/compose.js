@@ -1,12 +1,11 @@
-// copy from redux project
-export default function compose(...funcs) {
-  if (funcs.length === 0) {
+export default (...functions)=> {
+  if (functions.length === 0) {
     return arg => arg
   }
 
-  if (funcs.length === 1) {
-    return funcs[0]
+  if (functions.length === 1) {
+    return functions[0]
   }
 
-  return funcs.reduce((a, b) => (...args) => a(b(...args)))
+  return functions.reduce((prev,next ) => (...args) => prev(next(...args)))
 }
