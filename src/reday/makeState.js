@@ -28,11 +28,11 @@ export default (initialState, stateName, storeObejct = store,mapFunc = null) => 
       this.state = initialState ? initialState : {}
       if (!!mapFunc) mapFunc(this);
       registerThis(this,stateName,storeObejct)
-      console.log('enter makeState component:constructor,Counter is:',store.Counter)
+      console.log('makeState|constructor=>')
     }
 
     render() {
-      console.log('enter makeState component:render,Counter is:',store.Counter)
+      console.log('makeState|render=>')
       return (
         <WrappedComponent
           {...this.props}
@@ -40,7 +40,7 @@ export default (initialState, stateName, storeObejct = store,mapFunc = null) => 
       )
     }
   }
-  console.log('enter makeState hoc',store) //这里store为空，因为State类的构造方法还没有执行
+  console.log('makeState|hoc=>') //这里store为空，因为State类的构造方法还没有执行
   State.displayName = `State(${WrappedComponent.name || WrappedComponent.displayName})`;
   return State
 }

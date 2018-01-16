@@ -13,7 +13,7 @@ export default (mapProps = null) => WrappedComponent => {
         throw new Error('mapProps should be a function')
       this.mapped = {};
       this.mapProps = mapProps;
-      console.log('enter useState component:constructor')
+      console.log('useState|constructor=>')
     }
     // componentWillUnmount() {
     //   this.setState = (state, callback) => {
@@ -22,7 +22,7 @@ export default (mapProps = null) => WrappedComponent => {
     // }
 
     render() {
-      console.log('enter useState component:render,this.mapProps is:',this.mapProps)
+      console.log('useState|render=>')
       if (this.mapProps)
         this.mapped = this.mapProps(this.props);
 
@@ -36,7 +36,7 @@ export default (mapProps = null) => WrappedComponent => {
     }
   }
 
-  console.log('enter useState hoc')
+  console.log('useState|hoc=>')
   UseState.displayName = `UseState(${WrappedComponent.name || WrappedComponent.displayName})`;
   return UseState
 }
