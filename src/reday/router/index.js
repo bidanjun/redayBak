@@ -1,6 +1,6 @@
 import React  from 'react'
 import routeParser  from 'route-parser'
-import {registerState,store} from '../reday'
+import {registerState,store} from '../'
 
 
 export class Router extends React.Component {
@@ -59,5 +59,10 @@ export class Router extends React.Component {
     }
 }
 
-export default registerState('router',store,(comp)=>{comp.state.goto=comp.goto.bind(comp)})(Router)
+// return HashRouter component
+// we could use store.router.goto(url) to change the url
+// and could type the url in browser,then show the expect component
+export default registerState('router',store,(comp)=>{
+    comp.state.goto=comp.goto.bind(comp)
+})(Router)
 

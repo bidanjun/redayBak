@@ -1,7 +1,5 @@
 import React from 'react'
-import { store } from '../../reday';
-
-import HashRouter from '../../router'
+import { store,HashRouter } from '../../reday';
 
 const HomePage = ()=>(<h2> Home Page </h2>)
 const BlogPage = ({id})=>(<h2> Blog Page {id} </h2>)
