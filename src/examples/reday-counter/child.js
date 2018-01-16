@@ -1,6 +1,6 @@
 
 import React from 'react'
-import {store} from '../../lib/reday'
+import {store} from '../../reday'
 import GrandChild from './grandChild'
 
 export default (props)=>{

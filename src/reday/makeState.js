@@ -9,7 +9,7 @@ const registerThis = (comp,stateName, storeObejct = store)=>{
   comp.state.setState = comp.setState;
   Object.defineProperty(storeObejct, stateName, {
     get: () => {
-      return this.state;
+      return comp.state;
     }
   });
 }
@@ -23,13 +23,16 @@ const registerThis = (comp,stateName, storeObejct = store)=>{
 export default (initialState, stateName, storeObejct = store,mapFunc = null) => WrappedComponent => {
   class State extends Component {
     constructor(props, context) {
+      
       super(props, context);
       this.state = initialState ? initialState : {}
       if (!!mapFunc) mapFunc(this);
       registerThis(this,stateName,storeObejct)
+      console.log('enter makeState component:constructor,Counter is:',store.Counter)
     }
 
     render() {
+      console.log('enter makeState component:render,Counter is:',store.Counter)
       return (
         <WrappedComponent
           {...this.props}
@@ -37,6 +40,7 @@ export default (initialState, stateName, storeObejct = store,mapFunc = null) => 
       )
     }
   }
+  console.log('enter makeState hoc',store) //这里store为空，因为State类的构造方法还没有执行
   State.displayName = `State(${WrappedComponent.name || WrappedComponent.displayName})`;
   return State
 }

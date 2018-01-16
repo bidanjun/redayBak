@@ -2,7 +2,7 @@ import React from 'react'
 import Child from './child'
 
 
-import {compose,useState, makeState,store} from '../../lib/reday'
+import {compose,useState, makeState,store} from '../../reday'
 const increment=(state, props) => {
   return {
     counter: state.counter + 1
@@ -25,10 +25,14 @@ const Counter = ({counter, handleIncrement}) => {
 //注意compose中，makeState在前，useState在后
 export default compose(  
   makeState({counter:0},'Counter',store),
-  useState(()=>({
-    counter:store.Counter.counter,
-    handleIncrement:()=>store.Counter.setState(increment)
-  })),
+  useState(()=>{
+    console.log('enter mapProps');
+    return {
+      counter:store.Counter.counter,
+      handleIncrement:()=>store.Counter.setState(increment)
+    }
+  }),
+  
 ) (Counter)
 
 //等同于如下的写法：
