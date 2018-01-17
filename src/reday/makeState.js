@@ -7,6 +7,13 @@ export const store = {};
 const registerThis = (comp,stateName, storeObejct = store)=>{  
   comp.setState = comp.setState.bind(comp)
   comp.state.setState = comp.setState;
+
+  //add setStateAsync,so we could use async/await
+  comp.state.setStateAsync=(func)=>{
+    return new Promise((resolve) => {
+      comp.setState(func, resolve)
+    });
+  }
   Object.defineProperty(storeObejct, stateName, {
     get: () => {
       return comp.state;
