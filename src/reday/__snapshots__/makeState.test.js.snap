@@ -1,5 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`after click,counter=1,result is: 1`] = `<comp />`;
-
-exports[`before click ,counte is 0,result is: 1`] = `<comp />`;
