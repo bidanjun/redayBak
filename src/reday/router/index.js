@@ -62,7 +62,17 @@ export class Router extends React.Component {
 // return HashRouter component
 // we could use store.router.goto(url) to change the url
 // and could type the url in browser,then show the expect component
-export default registerState('router',store,(comp)=>{
+// export default registerState('router',store,(comp)=>{
+//     comp.state.goto=comp.goto.bind(comp)
+// })(Router)
+
+// here return a function
+export const makeRouter=(stateName='router',storeObject=store)=>registerState(stateName,storeObject,(comp)=>{
     comp.state.goto=comp.goto.bind(comp)
 })(Router)
+
+// return HashRouter component
+// we could use store.router.goto(url) to change the url
+// and could type the url in browser,then show the expect component
+export default makeRouter();
 
