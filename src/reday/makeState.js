@@ -27,14 +27,14 @@ const registerThis = (comp,stateName, storeObejct = store)=>{
 // comp.state.func=comp.func.bind(comp);
 // comp.state.anotherFunc=comp.anotherFunc.bind(comp)};
 //so we could use these function outside component
-export default (initialState, stateName, storeObejct = store,mapFunc = null) => WrappedComponent => {
+export default (initialState, stateName, storeObject = store,mapFunc = null) => WrappedComponent => {
   class State extends Component {
     constructor(props, context) {
       
       super(props, context);
       this.state = initialState ? initialState : {}
       if (!!mapFunc) mapFunc(this);
-      registerThis(this,stateName,storeObejct)
+      registerThis(this,stateName,storeObject)
       console.log('makeState|constructor=>')
     }
 
@@ -52,33 +52,13 @@ export default (initialState, stateName, storeObejct = store,mapFunc = null) => 
   return State
 }
 
-
-// get the state of a component,and register to store
-export const registerState= (stateName,storeObjet=store,mapFunc=null)=>(WrappedComponent)=> {
-  class Register extends WrappedComponent {
-    constructor(props,context) {
-      super(props, context);
-      if (!!mapFunc) mapFunc(this);
-      registerThis(this,stateName,storeObjet)
-    }
-    render() {
-      return super.render()
-    }
-  }
-  Register.displayName = `Register(${WrappedComponent.name || WrappedComponent.displayName})`;
-  return Register
-}
-
-import React, { Component } from 'react';
-
-
 // 执行一个promise,即参数action
 // 使用场景：预先载入数据，或者点击按钮执行，fetch场景，可以再次封装refetch
 // pendingComp，promise正在运行时，要呈现的组件
 // errorComp,promise执行出错时，要呈现的组件
 // emptyComp,promise成功执行，但返回的数据为空的时候，要呈现的组件
 // 在上述三个条件之外，才显示正常的Comp组件
-const makeAsyncState = (action,pendingComp=null,errorComp=null) => (Comp) =>
+export const makeAsyncState = (action,stateName,storeObject=store,mapFunc=null,pendingComp=null,errorComp=null) => (Comp) =>
   class withAsync extends Component {
     constructor(props) {
       super(props);
@@ -88,10 +68,13 @@ const makeAsyncState = (action,pendingComp=null,errorComp=null) => (Comp) =>
         pending: false,
         error: null,
       };
+
+       if (!!mapFunc) mapFunc(this);
+      registerThis(this,stateName,storeObject)
     }
 
     async componentDidMount() {
-      this.setState(()=>{ pending: true });
+      this.setState(()=>({ pending: true }));
       let result;
       try {
         result=await action(this.props);
@@ -114,7 +97,27 @@ const makeAsyncState = (action,pendingComp=null,errorComp=null) => (Comp) =>
 
       }
 
+      // here we attatch state to Comp
+      // so we needn't useState?
       return <Comp { ...this.props } { ...this.state } />
     }
   }
+  
+// get the state of a component,and register to store
+export const registerState= (stateName,storeObjet=store,mapFunc=null)=>(WrappedComponent)=> {
+  class Register extends WrappedComponent {
+    constructor(props,context) {
+      super(props, context);
+      if (!!mapFunc) mapFunc(this);
+      registerThis(this,stateName,storeObjet)
+    }
+    render() {
+      return super.render()
+    }
+  }
+  Register.displayName = `Register(${WrappedComponent.name || WrappedComponent.displayName})`;
+  return Register
+}
+
+
 
