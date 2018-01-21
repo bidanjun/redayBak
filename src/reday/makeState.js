@@ -4,7 +4,7 @@ import React, { Component } from 'react'
 export const store = {};
 
 //register state of a component to store
-const registerThis = (comp,stateName, storeObejct = store)=>{  
+export const registerThis = (comp,stateName, storeObejct = store)=>{  
   comp.setState = comp.setState.bind(comp)
   comp.state.setState = comp.setState;
 
