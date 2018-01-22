@@ -11,18 +11,26 @@
 // 创建一个state
 // 该state按照字段划分
 import React, { Component } from 'react';
-import {registerThis} from './makeState'
 import {store} from './'
 
 //register state of a component to store
-export const registerModel = (comp,model)=>{  
-  initialState={}
+export const registerModel = (comp,models)=>{  
+  let initialState={}
 
-  models.map((model)=>{
 
-    initialState=model.fieldName?{...initialState,[model.fieldName]:{...model}}:{...initialState,...model}
-    model.state=comp.state // 由此model也获得state的指针
-  })
+  models.forEach(model => {
+   
+    Object.defineProperty(model, 'state', {
+      get: () => {
+        return comp.state;
+      }
+    }); 
+   
+    // 此处不解开类的实例
+    initialState=model.fieldName?{...initialState,[model.fieldName]:model}:{...initialState,...model}
+    console.log('initialState=',initialState)
+ 
+  });
   comp.state=initialState;
   comp.setState = comp.setState.bind(comp)
   comp.state.setState = comp.setState;  
@@ -68,9 +76,9 @@ export default (stateName,storeObejct=store,...models) => WrappedComponent => {
 
       super(props, context);
       this.state = {}
-      models.map((model) => {
-        registerModel(this, model)
-      })
+      console.log('...models=',models)
+     
+      registerModel(this,models);
 
       //add setStateAsync,so we could use async/await
       this.state.setStateAsync = (func) => {
@@ -83,9 +91,7 @@ export default (stateName,storeObejct=store,...models) => WrappedComponent => {
           return this.state;
         }
       });
-
-      if (!!mapFunc) mapFunc(this);
-      console.log('makeState|constructor=>')
+      console.log('makeStore|constructor=>store=',store.appState)
     }
 
     render() {
