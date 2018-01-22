@@ -32,8 +32,6 @@ export const registerModel = (comp, models) => {
 
     // 此处不解开类的实例
     initialState = model.storeId ? { ...initialState, [model.storeId]: model } : { ...initialState, ...model }
-    console.log('initialState=', initialState)
-
   });
   comp.state = initialState;
   comp.setState = comp.setState.bind(comp)
@@ -80,8 +78,6 @@ export default (stateName, storeObejct = store, ...models) => WrappedComponent =
 
       super(props, context);
       this.state = {}
-      console.log('...models=', models)
-
       registerModel(this, models);
 
       //add setStateAsync,so we could use async/await
@@ -95,12 +91,12 @@ export default (stateName, storeObejct = store, ...models) => WrappedComponent =
           return this.state;
         }
       });
-      console.log('makeStore|constructor=>store=', store.appState)
+      //console.log('makeStore|constructor=>store=', store.appState)
     }
 
     render() {
       // 这里不将state作为属性传递下去
-      console.log('makeState|render=>')
+      // console.log('makeState|render=>')
       return (
         <WrappedComponent
           {...this.props}
