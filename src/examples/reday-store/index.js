@@ -1,33 +1,38 @@
 import React from 'react'
 import {makeStore,compose,useState,store} from '../../reday'
 
+// 在这里简单的忽略storeId
+const increment=(state, props) => {
+  return {counter:state.counter+1}
+}
+
 class counterLeft {
-  counter=0
-  fieldName=null
+  storeId=null
+
   state=null //指向组件state的指针
-  constructor (fieldName=null){
-    this.fieldName=fieldName;
+  setState = null
+  constructor (storeId=null){
+    this.storeId=storeId;
   }
 
-  handleIncrement=()=>this.state.setState(increment(this.fieldName))
+  // 用于处理storeId
+  setState=(func)=> {
+    this.state.setState((state,props)=>{
+      let result=func(state[this.storeId],props)//在storeId的层面，写action，这里先执行一遍得到结果
+      return {[this.storeId]:{...state[this.storeId],...result}} //然后处理storeId
+    })  
+  }
+
+  // 有意义的状态
+  counter=0
+
+  //action可直接调用
+  handleIncrement=()=>this.setState(increment)
 
 }
 
 let counterFirst=new counterLeft('counterFirst')
 //let counterSecond=new counterLeft()
-
-const increment=(fieldName)=>(state, props) => {
-  console.log('currentState:',state)
-
-  // 步骤1，修改counter,但要保留[fieldName]的其它内容
-  // 否则除了counter之外的其它字段、函数消失
-  let result={[fieldName]:{...state[fieldName],counter:state[fieldName].counter+1}} //因此这里需要保留全部，然后修改counter
-  
-  
-  // 不需要，我们仅仅提供需要修改的部分即可，不需要构建完整的
-  //let merged={...state,...result} //用后面的覆盖前面的
-  return result// 注意不可写成{...result,...state}
-}
 
 const Counter = ({counter, handleIncrement}) => {
   return (

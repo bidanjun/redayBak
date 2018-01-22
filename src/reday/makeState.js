@@ -42,7 +42,7 @@ export default (initialState, stateName, storeObject = store,mapFunc = null) => 
       console.log('makeState|render=>')
       return (
         <WrappedComponent
-          {...this.props}
+          {...this.state} {...this.props}
         />
       )
     }
@@ -99,7 +99,8 @@ export const makeAsyncState = (action,stateName,storeObject=store,mapFunc=null,p
 
       // here we attatch state to Comp
       // so we needn't useState?
-      return <Comp { ...this.props } { ...this.state } />
+      // 这里同时将setState也传递下去了
+      return <Comp  { ...this.state } { ...this.props } />
     }
   }
   
