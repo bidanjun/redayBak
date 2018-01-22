@@ -30,6 +30,7 @@ export const registerModel = (comp, models) => {
           return { [model.storeId]: { ...state[model.storeId], ...result } } //然后处理storeId
         })
       }
+      console.log('model=',model)
     }
 
     // 此处不解开类的实例
