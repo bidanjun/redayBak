@@ -1,34 +1,36 @@
 
-// makeStore，根据多个类实例，创建一个单独的状态
-// class必须有storeId字段，用于决定其是直接加入状态，还是需要一个字段名
-// class同时得到state的指针，这样可以访问相应的状态和setState方法
-// 如果有storeId，则action需要为两级，一级自动的处理storeId，便于action统一书写
-
-//需要测试一下
-
-
-
-// 创建一个state
-// 该state按照字段划分
+// makeStore，根据多个类实例或者object，创建一个单独的状态
+// model如果有storeId字段，则加入状态时会附上该字段名，比如{counterLeft:{counter:0}}
+// 如果没有，则直接加入状态，呈现为{counter:0}
+// model得到state的指针和setState函数，前者可以访问整个状态，包括state.setState，这是组件原始的setState函数
+// 后者是model使用的setState函数，如此在编写action的时候，无需考虑二级字段问题。
+// 若没有复杂的业务逻辑，一个包括或不包括objectId字段的object,同样可简单用于makeStore
 import React, { Component } from 'react';
 import { store } from './'
 
 //register state of a component to store
-// model的构造函数只需要一个storeId
-// model的成员是initialState
-// model可以使用this.state,该state由makeStore传递过去
-// model没有其它的限制，我们可以提供一个修改多级状态的帮助函数
 export const registerModel = (comp, models) => {
   let initialState = {}
-
-
   models.forEach(model => {
+    if (!!model.storeId) {
+      Object.defineProperty(model, 'state', {
+        get: () => {
+          return comp.state;
+        }
+      });
 
-    Object.defineProperty(model, 'state', {
-      get: () => {
-        return comp.state;
+      // 用于处理storeId
+      model.setState = (func) => {
+        if (!model.storeId)
+          return model.state.setState(func); //如果没有storeId,则直接的使用传来的函数
+
+        //否则在这里处理storeId  
+        model.state.setState((state, props) => {
+          let result = func(state[model.storeId], props)//在storeId的层面，写action，这里先执行一遍得到结果
+          return { [model.storeId]: { ...state[model.storeId], ...result } } //然后处理storeId
+        })
       }
-    });
+    }
 
     // 此处不解开类的实例
     initialState = model.storeId ? { ...initialState, [model.storeId]: model } : { ...initialState, ...model }
@@ -39,39 +41,6 @@ export const registerModel = (comp, models) => {
 }
 
 
-//给出initialState
-//获得state
-//提供业务逻辑和action
-
-// !!整个本身就当作状态，有field加上，没有直接展开
-// 当整个加到state的时候，则组件本身，具有它的全部功能
-// 这样甚至连initState都不需要
-// 换言之this.state={...state,[storeId]:...user}
-// 若storeId===null，则(...state,...user)
-
-// model只需要storeId，创建时为null，则不能用于makeStore
-// 注意：stateName和storeName由makeState和makeStore决定！！
-// 初始状态和storeId用来构建初始状态，
-// state和store的名字可以任意
-// 用于组合构建initialState
-// 当单独使用的时候storeId无用
-// 同时model应该提供初始状态，该状态全部实例公用
-// 实例field存在的时候，makeStore处理它，makeState无需提供，若提供则makeState同样的按字段处理
-// 总的来说，多个状态用makeStore，单个用makeState
-// export class model {
-//   constructor (storeId=null) {
-//     this.storeId=storeId;
-//   }
-//   static get initialState() {
-//     return {}
-//   }
-//   get initialState() {
-//     return model.initialState
-//   }
-// }
-
-// 此刻makeStore决定storeName和stateName
-// model决定storeId,若storeId为空则整体移入
 export default (stateName, storeObejct = store, ...models) => WrappedComponent => {
   class Store extends Component {
     constructor(props, context) {
