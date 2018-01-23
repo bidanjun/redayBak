@@ -39,5 +39,8 @@ redux is so bad,so I made reday to manage state of react app. yes, it's very sim
   no action type and action name,just a function as action  
   no reducer here  
   no need createStore ,store is only an object like {}  
-  no need Provider,you just import {store},then could access state in the component tree,Flux now only for:state+action=>state
+  no need Provider,you just import {store},then could access state in the component tree,Flux now only  
+  for:state+action=>state  
+  
+
 
