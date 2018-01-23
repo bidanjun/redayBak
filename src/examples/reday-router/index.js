@@ -18,6 +18,9 @@ let otherRouter={
   '/other/home':OtherHomePage,
   '/other/blog/:id':OtherBlogPage
 }
+
+// 对于默认的router，只要使用默认的HashRouter，提供routes，则store.router就是默认的，一般执行goto转移。
+//这里另行定义一个Router，占据某个区域，此刻store中可以保存另一个router
 const OtherRouter=makeRouter('otherRouter',store); //另一个Router
 
 export default (props) => {
