@@ -61,6 +61,10 @@ export default class refetch {
 
   }
   // 封装Fetch的options
+  // method无所谓,header的头两部分是固定的，唯一header中要增加jwt部分
+  // 这个方法需要转换post的body
+  // 设计？与auth如何解耦，同时方便？如何保存header不用每次处理？
+  // setHeader就好？
   static _getFetchOptions = (method = 'GET', parameter) => {
     let config = {
       method: method,

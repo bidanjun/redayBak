@@ -8,6 +8,18 @@ export default class refetch {
     return this._fetch(url, 'POST', parameter);
   }
 
+  static defaultHeaders = {};
+
+  // if loggin,should add header here
+  static addDefaultHeaders = (otherOptions)=>{
+   refetch.defaultHeaders=  Object.assign({}, refetch.defaultHeaders, otherOptions);
+  }
+
+  // if logout,should reset header here
+  static resetDefaultHeaders = (otherOptions)=>{
+    refetch.defaultHeaders=  {};
+   }
+
   static async _fetch(url, method='GET', parameter=null, otherConfig=null) {
     let options = refetch._getFetchOptions(method, parameter,otherConfig=null);
     try {
@@ -25,28 +37,25 @@ export default class refetch {
       throw(err)  // 截获上面抛出的异常，然后继续抛出
     }
   }
-
-  // add auth config,like this:
-  //     if (Auth.currentUser) {
-  //  headers = Object.assign({}, headers, { 'Authorization': `Bearer ${Auth.currentUser.token}` })}
-  //  config = Object.assign({}, config, { headers }); //这里必须加上{}，否则增加的是headers的内容
-  //      let headers = {
-  //  'Accept': 'application/json',
-  //  'Content-Type': 'application/json'}
-  static _getFetchOptions = (method = 'GET',parameter=null, otherConfig=null) => {
+  // 封装Fetch的options
+  // method无所谓,header的头两部分是固定的，唯一header中要增加jwt部分
+  // 这个方法需要转换post的body
+  // 设计？与auth如何解耦，同时方便？如何保存header不用每次处理？
+  // setHeader就好？
+  static _getFetchOptions = (method = 'GET', parameter) => {
     let config = {
       method: method,
     };
-    
-    // add otherConfig
-    if (otherConfig)
-      config = Object.assign({}, config, otherConfig);
-
-    // add parameters
+    let headers = {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    }
+    headers = Object.assign({}, headers, refetch.defaultHeaders)
+    config = Object.assign({}, config, { headers }); //这里必须加上{}，否则增加的是headers的内容
     if (parameter) {
       if (method === 'POST')
         config = Object.assign({}, config, { body: JSON.stringify(parameter) });
-      // if get，we only need something like '/user/{id}'         
+      // Todo:如果是get，使用route-parser将其转换到url中        
     }
     return config;
   }
