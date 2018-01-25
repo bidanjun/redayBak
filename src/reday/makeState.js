@@ -8,17 +8,17 @@ export const registerThis = (comp,stateName, storeObejct = store)=>{
   if (!stateName)
     return; //we could only pass the state to child as props
   comp.setState = comp.setState.bind(comp)
-  comp.state.setState = comp.setState;
 
   //add setStateAsync,so we could use async/await
-  comp.state.setStateAsync=(func)=>{
+  //异步setState，便于await后执行，或中途取消
+  comp.setStateAsync=(func)=>{
     return new Promise((resolve) => {
       comp.setState(func, resolve)
     });
   }
   Object.defineProperty(storeObejct, stateName, {
     get: () => {
-      return comp.state;
+      return comp;
     }
   });
 }
@@ -29,13 +29,12 @@ export const registerThis = (comp,stateName, storeObejct = store)=>{
 // comp.state.func=comp.func.bind(comp);
 // comp.state.anotherFunc=comp.anotherFunc.bind(comp)};
 //so we could use these function outside component
-export default (initialState, stateName, storeObject = store,mapFunc = null) => WrappedComponent => {
+export default (initialState, stateName, storeObject = store) => WrappedComponent => {
   class State extends Component {
     constructor(props, context) {
       
       super(props, context);
       this.state = initialState ? initialState : {}
-      if (!!mapFunc) mapFunc(this);
       registerThis(this,stateName,storeObject)
       console.log('makeState|constructor=>')
     }
@@ -56,11 +55,10 @@ export default (initialState, stateName, storeObject = store,mapFunc = null) => 
 
 
 // get the state of a component,and register to store
-export const registerState= (stateName,storeObjet=store,mapFunc=null)=>(WrappedComponent)=> {
+export const registerState= (stateName,storeObjet=store)=>(WrappedComponent)=> {
   class Register extends WrappedComponent {
     constructor(props,context) {
       super(props, context);
-      if (!!mapFunc) mapFunc(this);
       registerThis(this,stateName,storeObjet)
     }
     render() {

@@ -28,7 +28,7 @@ export default compose(
   useState(()=>{
     console.log('enter mapProps');
     return {
-      counter:store.Counter.counter,
+      counter:store.Counter.state.counter,
       handleIncrement:()=>store.Counter.setState(increment)
     }
   }),
