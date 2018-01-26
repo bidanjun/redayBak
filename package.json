@@ -1,6 +1,10 @@
 {
   "name": "reday",
+<<<<<<< HEAD
   "version": "0.4.12",
+=======
+  "version": "0.4.8",
+>>>>>>> 2fbb24777c45de9a4c9c2efdb0c0b4e4d826f4d7
   "private": false,
   "repository": {
     "type": "git",
@@ -40,7 +44,8 @@
     "prop-types": "^15.6.0",
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
-    "react-scripts": "^1.1.0"
+    "react-scripts": "^1.1.0",
+    "react-test-renderer": "^16.2.0"
   },
   "dependencies": {
     "route-parser": "0.0.5"

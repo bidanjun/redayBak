@@ -67,9 +67,7 @@ export class Router extends React.Component {
 // })(Router)
 
 // here return a function
-export const makeRouter=(stateName='router',storeObject=store)=>registerState(stateName,storeObject,(comp)=>{
-    comp.state.goto=comp.goto.bind(comp)
-})(Router)
+export const makeRouter=(stateName='router',storeObject=store)=>registerState(stateName,storeObject)(Router)
 
 // return HashRouter component
 // we could use store.router.goto(url) to change the url

@@ -11,7 +11,7 @@ export default (props)=>{
   }
   return (
     <div>
-       ________grandChild: {store.Counter.counter}
+       ________grandChild: {store.Counter.state.counter}
        <button onClick={handleDecrement}>  - </button>
     </div>
   )
