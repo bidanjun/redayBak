@@ -8,6 +8,12 @@ export const registerThis = (comp,stateName, storeObejct = store)=>{
   if (!stateName)
     return; //we could only pass the state to child as props
   comp.setState = comp.setState.bind(comp)
+  storeObejct[stateName]=comp;
+  // Object.defineProperty(storeObejct, stateName, {
+  //   get: () => {
+  //     return comp;
+  //   }
+  // });
 
   //add setStateAsync,so we could use async/await
   //异步setState，便于await后执行，或中途取消
@@ -16,11 +22,6 @@ export const registerThis = (comp,stateName, storeObejct = store)=>{
       comp.setState(func, resolve)
     });
   }
-  Object.defineProperty(storeObejct, stateName, {
-    get: () => {
-      return comp;
-    }
-  });
 }
 
 //an hoc to create state for wrappedComponent
@@ -33,10 +34,10 @@ export default (initialState, stateName, storeObject = store) => WrappedComponen
   class State extends Component {
     constructor(props, context) {
       
-      super(props, context);
+      super(props, context); // we couldn't use this before super(props,context)
       this.state = initialState ? initialState : {}
       registerThis(this,stateName,storeObject)
-      console.log('makeState|constructor=>')
+      // console.log('makeState|constructor=>')
     }
 
     render() {
