@@ -24,24 +24,82 @@ export const registerThis = (comp,stateName, storeObejct = store)=>{
   }
 }
 
+// default beforeRender
+//这里pendingComp如何传递？测试一下！！
+const beforeRenderDefault=(comp,pendingComp,errorComp)=>{
+  if (comp.state.pending) {
+    if (pendingComp) return pendingComp
+    return <div>loading... </div>
+  }
+  if (comp.state.error) {
+    if (errorComp) return <errorComp error={comp.state.error} />
+    return <div>{comp.state.error} </div>
+
+  }
+  // 这里同时将setState也传递下去了
+  // return <Comp  { ...comp.state } { ...comp.props } />
+}
 //an hoc to create state for wrappedComponent
 //most times we use this to make state,and access anywhere by store
 // mapFunc could bind some function of component to state : (comp)=>{
 // comp.state.func=comp.func.bind(comp);
 // comp.state.anotherFunc=comp.anotherFunc.bind(comp)};
 //so we could use these function outside component
-export default (initialState, stateName, storeObject = store) => WrappedComponent => {
+// beforeRender可以提供一个默认值，处理pending,progress,error这3个组件全局保持一致
+// empty可以调用这个默认值
+// 另外一个render函数则是login和rbac情况
+export default (initialState, stateName, storeObject = store,beforeMount=null,beforeRender=beforeRenderDefault,beforeUnmount=null) => WrappedComponent => {
   class State extends Component {
     constructor(props, context) {
       
       super(props, context); // we couldn't use this before super(props,context)
       this.state = initialState ? initialState : {}
+      if (beforeMount)
+        this.state = {
+          ...this.state,
+          data: null,
+          pending: false,
+
+          pendingToatal:-1, //若需要处理进度
+          pendingCounter:-1,
+
+          error: null,
+        };
       registerThis(this,stateName,storeObject)
       // console.log('makeState|constructor=>')
     }
 
+    async componentDidMount() {
+      if (beforeMount) {
+        this.setState(() => ({ pending: true }));
+
+        // 这样获得的数据是{data:结果}
+        try {
+          let data = await this.props.mount(this.props);
+          this.setState(() => ({ data, pending: false, error: null }))
+        }
+        catch (error) {
+          this.setState(() => ({ error, pending: false }))
+        };
+      }
+    }
+
     render() {
       console.log('makeState|render=>')
+
+      // 如果需要处理条件render
+      let renderOther=null;      
+      if (beforeMount && beforeRender) {
+        renderOther=beforeRender(this)
+
+        //对于权限判断，可在renderOther中处理
+        //data:false...这样很明显，我们没有得到授权，renderOther返回null
+        if (renderOther || renderOther===null) //仅当renderOther不为空或null的时候，才返回renderOther
+          return renderOther;
+      }
+
+      // 如果renderOther没有拦截，则返回正常组件
+      // 但这里明显有问题，我们如何处理返回null的情形？
       return (
         <WrappedComponent
           {...this.state} {...this.props}
