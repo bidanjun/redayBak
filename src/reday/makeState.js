@@ -41,15 +41,23 @@ export const createState = (initialState, getComponent, useState = true) => Wrap
 export default (initialState, stateName, storeObject = store)=>WrappedComponent =>
   createState(initialState,(comp)=>{
     if (stateName)
-    storeObject[stateName]=comp;
+      storeObject[stateName]=comp;
   })(WrappedComponent) //注意如何复用hoc，这里用到WrappedComponent
 
 // get the state of a component,and register to store
-export const registerState= (stateName,storeObjet=store)=>(WrappedComponent)=> {
+export const registerState= (stateName,storeObject=store)=>(WrappedComponent)=> {
   class Register extends WrappedComponent {
     constructor(props,context) {
       super(props, context);
-      registerThis(this,stateName,storeObjet)
+      this.setState = this.setState.bind(this); //::
+      this.setStateAsync = (action) => {
+        return new Promise((resolve) => {
+          this.setState(action, resolve)
+        });
+      }
+      this.setStateAsync = this.setStateAsync.bind(this);
+      if (stateName)
+        storeObject[stateName]=this;
     }
     render() {
       return super.render()
