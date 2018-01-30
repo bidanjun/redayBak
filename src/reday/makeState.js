@@ -37,25 +37,25 @@ export const createState = (initialState, getComponent=null, useState = true,asy
           data: null,
           pending: false,
           error: null,
-        };
-
-      
+        };      
       
       registerThis(this); //if it has stateName,we'll register it in the storeObject
       getComponent(this); // here you could get the instance of the component,and save it by yourself
     }
 
     async componentDidMount() {
-      this.setState(() => ({ pending: true }));
+      if (!!asyncAction) {
+        this.setState(() => ({ pending: true }));
 
-      // the data store in the state,with fieldName 'data'
-      try {
-        let data = await asyncAction(this.props);
-        this.setState(() => ({ data, pending: false, error: null }))
+        // the data store in the state,with fieldName 'data'
+        try {
+          let data = await asyncAction(this.props);
+          this.setState(() => ({ data, pending: false, error: null }))
+        }
+        catch (error) {
+          this.setState(() => ({ error, pending: false }))
+        };
       }
-      catch (error) {
-        this.setState(() => ({ error, pending: false }))
-      };
     }
 
     render() {
@@ -65,7 +65,7 @@ export const createState = (initialState, getComponent=null, useState = true,asy
 
       return (
         <WrappedComponent
-          {...toProps} {...this.props}
+          {...toProps} {...this.props} {...{setState:this.setState}}
         />
       )
     }
@@ -85,7 +85,7 @@ export const makeAsyncState = (asyncAction,stateName, storeObject = store)=>Wrap
   createState({},(comp)=>{
     if (stateName)
       storeObject[stateName]=comp;
-  },true,asyncAction)(WrappedComponent) //注意如何复用hoc，这里用到WrappedComponent
+  },true,asyncAction)(WrappedComponent) //must have WrappedComponent here
 
 // get the state of a component,and register to store
 export const registerState= (stateName=null,storeObject=store)=>(WrappedComponent)=> {
