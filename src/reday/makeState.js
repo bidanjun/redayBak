@@ -3,8 +3,26 @@ import React, { Component } from 'react'
 // default store,you could made other store same way
 export const store = {};
 
-//直接使用，可将component的指针，传递给一个单一的变量
-export const createState = (initialState, getComponent, useState = true) => WrappedComponent => {
+// register component with state to a store
+export const registerThis = (comp, stateName = null, storeObject = store) => {
+  comp.setState = comp.setState.bind(comp); //::
+  comp.setStateAsync = (action) => {
+    return new Promise((resolve) => {
+      comp.setState(action, resolve)
+    });
+  }
+  comp.setStateAsync = comp.setStateAsync.bind(this);
+  if (stateName)
+    storeObject[stateName] = comp;
+}
+
+//create a component that has state
+// initialState is a object,
+// getInstance,like (component)=>{},you could get the instance and save it
+// useState is true by default,will map all state to child's props
+// asyncActions is a function that return a promise,if it's not null ,it will be exceute
+// in componentDidMount,and we'll add pending and error,data states to the state
+export const createState = (initialState, getComponent=null, useState = true,asyncAction=null) => WrappedComponent => {
 
   return class State extends Component {
 
@@ -12,20 +30,37 @@ export const createState = (initialState, getComponent, useState = true) => Wrap
 
     constructor(props, context) {
       super(props, context); // we couldn't use this before super(props,context)
+
       this.state = initialState ? initialState : {}
-      this.setState = this.setState.bind(this); //::
-      this.setStateAsync = (action) => {
-        return new Promise((resolve) => {
-          this.setState(action, resolve)
-        });
+      if (asyncAction) //if has asyncAction,add pending,error,and data field to state
+        this.state = {...this.state,
+          data: null,
+          pending: false,
+          error: null,
+        };
+
+      
+      
+      registerThis(this); //if it has stateName,we'll register it in the storeObject
+      getComponent(this); // here you could get the instance of the component,and save it by yourself
+    }
+
+    async componentDidMount() {
+      this.setState(() => ({ pending: true }));
+
+      // the data store in the state,with fieldName 'data'
+      try {
+        let data = await asyncAction(this.props);
+        this.setState(() => ({ data, pending: false, error: null }))
       }
-      this.setStateAsync = this.setStateAsync.bind(this);
-      getComponent(this); //这里将组件指针传递出去
+      catch (error) {
+        this.setState(() => ({ error, pending: false }))
+      };
     }
 
     render() {
       let toProps={}
-      if (useState)
+      if (useState || asyncAction)
         toProps={...this.state}
 
       return (
@@ -37,28 +72,29 @@ export const createState = (initialState, getComponent, useState = true) => Wrap
   }//end State component 
 }
 
-// 这里默认的使用makeState
-export default (initialState, stateName, storeObject = store)=>WrappedComponent =>
+//the default makeState hoc
+//if you provider a asyncAction,that mean we'll excute it at componentDidMount
+export default (initialState, stateName, storeObject = store,asyncAction=null)=>WrappedComponent =>
   createState(initialState,(comp)=>{
     if (stateName)
       storeObject[stateName]=comp;
-  })(WrappedComponent) //注意如何复用hoc，这里用到WrappedComponent
+  },true,asyncAction)(WrappedComponent) //notice here,we must use the WrappedComponent as argument
+
+// here,we only provider state from asyncState
+export const makeAsyncState = (asyncAction,stateName, storeObject = store)=>WrappedComponent =>
+  createState({},(comp)=>{
+    if (stateName)
+      storeObject[stateName]=comp;
+  },true,asyncAction)(WrappedComponent) //注意如何复用hoc，这里用到WrappedComponent
 
 // get the state of a component,and register to store
-export const registerState= (stateName,storeObject=store)=>(WrappedComponent)=> {
+export const registerState= (stateName=null,storeObject=store)=>(WrappedComponent)=> {
   class Register extends WrappedComponent {
     constructor(props,context) {
       super(props, context);
-      this.setState = this.setState.bind(this); //::
-      this.setStateAsync = (action) => {
-        return new Promise((resolve) => {
-          this.setState(action, resolve)
-        });
-      }
-      this.setStateAsync = this.setStateAsync.bind(this);
-      if (stateName)
-        storeObject[stateName]=this;
+      registerThis(this,stateName,storeObject)
     }
+
     render() {
       return super.render()
     }
