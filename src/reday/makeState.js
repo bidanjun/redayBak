@@ -3,6 +3,8 @@ import React, { Component } from 'react'
 // default store,you could made other store same way
 export const store = {};
 
+
+
 // register component with state to a store
 export const registerThis = (comp, stateName = null, storeObject = store) => {
   comp.setState = comp.setState.bind(comp); //::
@@ -103,5 +105,11 @@ export const registerState= (stateName=null,storeObject=store)=>(WrappedComponen
   return Register
 }
 
+export const actionWithField=(field)=>(action)=>(state,props)=>{
+  if (!!field)
+    return ({ [field]: { ...state[field], ...action(state[field], props)}})
+  else
+    return {...action(state, props)}
+}
 
 
