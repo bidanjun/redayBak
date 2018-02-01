@@ -30,7 +30,10 @@ describe('object', () => {
     proxy.pending=true;
     expect(proxy.pending).toBe(true);
     expect(values.pending).toBe(true);
-
-
   })
+
+  it('proxy should instead the origin object', () => {
+  })
+
+
 });

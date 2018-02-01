@@ -112,4 +112,35 @@ export const actionWithField=(field)=>(action)=>(state,props)=>{
     return {...action(state, props)}
 }
 
+// 包装action,加上id处理
+// 注意，同时兼顾了原action的参数。
+export const withId=(comp,field)=>(...args)=>(action)=>(state,props)=>{
+  if (!!field)
+    return ({ [field]: { ...state[field], ...action(state[field], props)(args)}})
+  else
+    return {...action(state, props)(args)}
+}
 
+//这样遍历传入的counter之类action集合，对于每个函数，用withId包装即可
+
+// 传入的参数，是object,包括一个initialState,一组action
+// 类似
+// counter.js
+// initState=0
+// const increment=(value)=>(state,props)=>state+value
+// const add=increment(1)
+// export default  {initState,increment,add}
+
+// import counter from './counter'
+// 则counter是一个对象。在state里是{counter:0}
+// 如果import leftCounter from './counter',则在state里会是{leftCounter:0}
+
+//这里一次性的为其组件增加counter对象，包括和counter同名的函数，但使用withId包裹，使用组件的setState
+//如此获取counter状态，用appState.state.counter
+//修改counter状态用appState.user.increment(3) //setState自动执行了,且处理了状态中的id
+export const makeNestedState=(stateName,storeObject,...models)=>{
+  models.map((model)=>{
+    
+  })
+
+}

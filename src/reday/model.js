@@ -29,6 +29,31 @@ export class model {
 //比如state.user,state.router等
 //组件同时通过models.user,models.router来访问? 或者直接组件.user之类访问?
 
-export const makeStore=(storeObject,...models)=>{
+//actions必须是一个纯对象
+export const makeStore=(stateName,storeObject,actions)=>{
+  const actionKeys = Object.keys(actions) //所有的键名
+
+
+
+
+
+  const finalactions = {}
+  for (let i = 0; i < actionKeys.length; i++) {
+    const key = actionKeys[i]
+
+
+
+    //finalactions是过滤后的actions，它的每一个属性都是一个function
+    if (typeof actions[key] === 'function') {
+      finalactions[key] = actions[key]
+    }
+  }
+
+  const finalactionKeys = Object.keys(finalactions) // 这里得到leftCounter,counter等，然后对其每个函数
+  
 
 }
+
+
+
+
