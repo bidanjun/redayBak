@@ -36,13 +36,13 @@ describe('proxy', () => {
 
   it('proxy should instead the function', () => {
 
-    let Counter = interceptObject(counter);
     let state = counter.intialState;
     const setState = (func) => {
       state = func(state);
     }
+    let Counter = interceptObject(counter,setState);
 
-    function interceptObject(obj) {
+    function interceptObject(obj,func) {
       let handler = {
         get(target, propKey, receiver) {
           const originMethod = target[propKey];
@@ -52,7 +52,7 @@ describe('proxy', () => {
             //args是一个数组,传入需要展开
             //若有参数需要执行originMethod,得到最终的action,也可origMethod.apply(this, args)
             //若没有参数，则不要执行originMethod
-            return setState(args.length>0 ? originMethod(...args):originMethod)
+            return func(args.length>0 ? originMethod(...args):originMethod)
           };
         }
       };
