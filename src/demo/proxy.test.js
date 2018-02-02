@@ -34,6 +34,7 @@ describe('proxy', () => {
     expect(values.pending).toBe(true);
   })
 
+  // 注意这里只能处理2阶函数，3阶就会失败
   it('proxy should instead the function', () => {
 
     let state = counter.intialState;

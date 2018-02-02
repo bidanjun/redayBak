@@ -30,14 +30,25 @@ export class model {
 //组件同时通过models.user,models.router来访问? 或者直接组件.user之类访问?
 
 //actions必须是一个纯对象
-export const makeStore=(stateName,storeObject,actions)=>{
-  const actionKeys = Object.keys(actions) //所有的键名
+// {...toggle,counter}
+// toggle很明显是会展开的....因此makeStore，每个都必须以其名为名
+// initialState里面的则无需命名
+export const makeStore=(initialState,stateName,storeObject,...actions)=>{
+  const actionKeys = Object.keys(actions) //所有的action集合的名称
 
 
+  // 遍历这些actions,它们基本是函数的集合
+  // 这些id已经保存actionsKey中
+  // 然后是this.setState(withActionId(actionKeys['counter'])(counter.increment))
+  for (let i = 0; i < actionKeys.length; i++) {
+    this[actionKeys[i]]=actionKeys[i]; //this.counter,this.user等，这里其实写成代理比较好
 
 
+  
+  
+  }
 
-  const finalactions = {}
+ const finalactions = {}
   for (let i = 0; i < actionKeys.length; i++) {
     const key = actionKeys[i]
 
