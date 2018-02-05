@@ -4,6 +4,34 @@ import React, { Component } from 'react'
 export const store = {};
 
 
+const withId=(id)=>(action)=>(state,props)=>{
+  if (!!id) return {[id]:action(state[id],props)}
+  else return action(state,props)
+}
+
+function interceptObject(obj,func,returnId) {
+  let id=returnId; //在这里保存参数
+      // 这里的action没有参数，必须确定为(state,props)=>形式
+
+
+  let handler = {
+    get(target, propKey, receiver) {
+      const originMethod = target[propKey];
+      console.log('target is:',target,'propkey is:',propKey)
+
+      //返回的是个函数,如果传入参数则为高阶函数
+      return function (...args) {
+        //args是一个数组,传入需要展开
+        //若有参数需要执行originMethod,得到最终的action,也可origMethod.apply(this, args)
+        //若没有参数，则不要执行originMethod
+        console.log('args=',args,'originMethod=',originMethod,'action=',withId(id)(args.length>0 ? originMethod(...args):originMethod))
+        return func(withId(id)(args.length>0 ? originMethod(...args):originMethod))
+      };
+    }
+  };
+  return new Proxy(obj, handler);
+}
+
 
 // register component with state to a store
 export const registerThis = (comp, stateName = null, storeObject = store) => {
@@ -24,7 +52,7 @@ export const registerThis = (comp, stateName = null, storeObject = store) => {
 // useState is true by default,will map all state to child's props
 // asyncActions is a function that return a promise,if it's not null ,it will be exceute
 // in componentDidMount,and we'll add pending and error,data states to the state
-export const createState = (initialState, getComponent=null, useState = true,asyncAction=null) => WrappedComponent => {
+export const createState = (initialState, getComponent=null,asyncAction=null,actions, useState = true) => WrappedComponent => {
 
   return class State extends Component {
 
@@ -34,6 +62,20 @@ export const createState = (initialState, getComponent=null, useState = true,asy
       super(props, context); // we couldn't use this before super(props,context)
 
       this.state = initialState ? initialState : {}
+      registerThis(this); //if it has stateName,we'll register it in the storeObject
+
+      console.log('actions=',actions)
+      const actionKeys = Object.keys(actions) //数组，每个action的名字
+      //如果actions不是空的，如{counter,leftCounter:...counter}
+      //则调用其initialState,合并到state
+      for (let i = 0; i < actionKeys.length; i++) {
+        this.state=Object.assign({},this.state,withId(actionKeys[i])(actions[actionKeys[i]].initialState)(this.state))
+        console.log('action key = ',actionKeys[i],'this.state=',this.state)
+        //然后创建setState代理。
+        this[actionKeys[i]]=interceptObject(actions[actionKeys[i]],this.setState,actionKeys[i]);
+      }
+
+      // 处理异步状态
       if (asyncAction) //if has asyncAction,add pending,error,and data field to state
         this.state = {...this.state,
           data: null,
@@ -41,7 +83,7 @@ export const createState = (initialState, getComponent=null, useState = true,asy
           error: null,
         };      
       
-      registerThis(this); //if it has stateName,we'll register it in the storeObject
+      
       getComponent(this); // here you could get the instance of the component,and save it by yourself
     }
 
@@ -76,18 +118,18 @@ export const createState = (initialState, getComponent=null, useState = true,asy
 
 //the default makeState hoc
 //if you provider a asyncAction,that mean we'll excute it at componentDidMount
-export default (initialState, stateName, storeObject = store,asyncAction=null)=>WrappedComponent =>
+export default (initialState, stateName, storeObject = store,asyncAction=null,actions)=>WrappedComponent =>
   createState(initialState,(comp)=>{
     if (stateName)
       storeObject[stateName]=comp;
-  },true,asyncAction)(WrappedComponent) //notice here,we must use the WrappedComponent as argument
+  },asyncAction,actions,true)(WrappedComponent) //notice here,we must use the WrappedComponent as argument
 
 // here,we only provider state from asyncState
 export const makeAsyncState = (asyncAction,stateName, storeObject = store)=>WrappedComponent =>
   createState({},(comp)=>{
     if (stateName)
       storeObject[stateName]=comp;
-  },true,asyncAction)(WrappedComponent) //must have WrappedComponent here
+  },asyncAction,null,true)(WrappedComponent) //must have WrappedComponent here
 
 // get the state of a component,and register to store
 export const registerState= (stateName=null,storeObject=store)=>(WrappedComponent)=> {
@@ -105,42 +147,3 @@ export const registerState= (stateName=null,storeObject=store)=>(WrappedComponen
   return Register
 }
 
-export const actionWithField=(field)=>(action)=>(state,props)=>{
-  if (!!field)
-    return ({ [field]: { ...state[field], ...action(state[field], props)}})
-  else
-    return {...action(state, props)}
-}
-
-// 包装action,加上id处理
-// 注意，同时兼顾了原action的参数。
-export const withId=(comp,field)=>(...args)=>(action)=>(state,props)=>{
-  if (!!field)
-    return ({ [field]: { ...state[field], ...action(state[field], props)(args)}})
-  else
-    return {...action(state, props)(args)}
-}
-
-//这样遍历传入的counter之类action集合，对于每个函数，用withId包装即可
-
-// 传入的参数，是object,包括一个initialState,一组action
-// 类似
-// counter.js
-// initState=0
-// const increment=(value)=>(state,props)=>state+value
-// const add=increment(1)
-// export default  {initState,increment,add}
-
-// import counter from './counter'
-// 则counter是一个对象。在state里是{counter:0}
-// 如果import leftCounter from './counter',则在state里会是{leftCounter:0}
-
-//这里一次性的为其组件增加counter对象，包括和counter同名的函数，但使用withId包裹，使用组件的setState
-//如此获取counter状态，用appState.state.counter
-//修改counter状态用appState.user.increment(3) //setState自动执行了,且处理了状态中的id
-export const makeNestedState=(stateName,storeObject,...models)=>{
-  models.map((model)=>{
-    
-  })
-
-}

@@ -1,18 +1,21 @@
 import React from 'react'
-import {store} from '../../reday'
+import {store,useState} from '../../reday'
 
-export default (props)=>{
-  const handleDecrement = ()=>{
-    store.Counter.setState((state,props)=> {
-      return {
-        counter:state.counter-1
-      }    
-    })
+export default useState(()=>{
+  console.log('enter mapProps');
+  return {
+    counterValue:store.Counter.state.counter,
+    handleDecrement:()=>{
+      console.log('click button now,increment is:',store.Counter.counter.increment)
+      return store.Counter.counter.decrement()
+    }
   }
+})( (props)=>{
+
   return (
     <div>
        ________grandChild: {store.Counter.state.counter}
-       <button onClick={handleDecrement}>  - </button>
+       <button onClick={props.handleDecrement}>  - </button>
     </div>
   )
-}
+})
