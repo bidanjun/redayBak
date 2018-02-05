@@ -89,12 +89,14 @@ describe('proxy', () => {
     leftCounter.add(2)
     expect(state).toEqual({counter:3})
 
-    state={leftCounter:0}
+    state={secondCounter:0}
     let secondCounter = interceptObject(counter,setState,'secondCounter');
     secondCounter.increment();
+    expect(state).toEqual({secondCounter:1})
     console.log('state of second Counter is:',state)
     secondCounter.add(2)
     console.log('state of second Counter is:',state)
+    expect(state).toEqual({secondCounter:3})
 
   
 
