@@ -58,13 +58,14 @@ describe('proxy', () => {
       let handler = {
         get(target, propKey, receiver) {
           const originMethod = target[propKey];
+          console.log('target is:',target,'propkey is:',propKey)
 
           //返回的是个函数,如果传入参数则为高阶函数
           return function (...args) {
             //args是一个数组,传入需要展开
             //若有参数需要执行originMethod,得到最终的action,也可origMethod.apply(this, args)
             //若没有参数，则不要执行originMethod
-            console.log('args=',args)
+            console.log('args=',args,'originMethod=',originMethod,'action=',withId(id)(args.length>0 ? originMethod(...args):originMethod))
             return func(withId(id)(args.length>0 ? originMethod(...args):originMethod))
           };
         }
@@ -73,8 +74,10 @@ describe('proxy', () => {
     }
 
     //测试没有id的情况
-    state=0
     let Counter = interceptObject(counter,setState);
+    console.log('Counter.intialState is:',Counter.initialState)
+    Counter.initialState();
+    console.log('initialState is:',state)
     Counter.increment()
     expect(state).toEqual(1)
     Counter.add(2)
@@ -82,15 +85,17 @@ describe('proxy', () => {
 
     //测试id为counter的情况
   
-    state={counter:0}
+    //state={counter:0}
     let leftCounter = interceptObject(counter,setState,'counter');
+    leftCounter.initialState();
     leftCounter.increment()
     expect(state).toEqual({counter:1})
     leftCounter.add(2)
     expect(state).toEqual({counter:3})
 
-    state={secondCounter:0}
+    //state={secondCounter:0}
     let secondCounter = interceptObject(counter,setState,'secondCounter');
+    secondCounter.initialState();
     secondCounter.increment();
     expect(state).toEqual({secondCounter:1})
     console.log('state of second Counter is:',state)
