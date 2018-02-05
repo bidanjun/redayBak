@@ -64,15 +64,16 @@ export const createState = (initialState, getComponent=null,asyncAction=null,act
       this.state = initialState ? initialState : {}
       registerThis(this); //if it has stateName,we'll register it in the storeObject
 
-      console.log('actions=',actions)
-      const actionKeys = Object.keys(actions) //数组，每个action的名字
-      //如果actions不是空的，如{counter,leftCounter:...counter}
-      //则调用其initialState,合并到state
-      for (let i = 0; i < actionKeys.length; i++) {
-        this.state=Object.assign({},this.state,withId(actionKeys[i])(actions[actionKeys[i]].initialState)(this.state))
-        console.log('action key = ',actionKeys[i],'this.state=',this.state)
-        //然后创建setState代理。
-        this[actionKeys[i]]=interceptObject(actions[actionKeys[i]],this.setState,actionKeys[i]);
+      // 这里需要判断，只有actions不为空，才做处理
+      if (!!actions) {
+        const actionKeys = Object.keys(actions) //数组，每个action的名字
+        //如果actions不是空的，如{counter,leftCounter:...counter}
+        //则调用其initialState,合并到state
+        for (let i = 0; i < actionKeys.length; i++) {
+          this.state = Object.assign({}, this.state, withId(actionKeys[i])(actions[actionKeys[i]].initialState)(this.state))
+          //然后创建setState代理。
+          this[actionKeys[i]] = interceptObject(actions[actionKeys[i]], this.setState, actionKeys[i]);
+        }
       }
 
       // 处理异步状态
