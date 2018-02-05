@@ -37,13 +37,24 @@ describe('proxy', () => {
   // 注意这里只能处理2阶函数，3阶就会失败
   it('proxy should instead the function', () => {
 
-    let state = counter.intialState;
+    let state = 0;
     const setState = (func) => {
       state = func(state);
-    }
-    let Counter = interceptObject(counter,setState);
+    }   
 
-    function interceptObject(obj,func) {
+
+    // withid除了处理返回值，还要处理传入的值
+    // action不单纯用state,而是[id]
+    const withId=(id)=>(action)=>(state,props)=>{
+      if (!!id) return {[id]:action(state[id],props)}
+      else return action(state,props)
+    }
+
+    function interceptObject(obj,func,returnId) {
+      let id=returnId; //在这里保存参数
+          // 这里的action没有参数，必须确定为(state,props)=>形式
+
+
       let handler = {
         get(target, propKey, receiver) {
           const originMethod = target[propKey];
@@ -53,17 +64,45 @@ describe('proxy', () => {
             //args是一个数组,传入需要展开
             //若有参数需要执行originMethod,得到最终的action,也可origMethod.apply(this, args)
             //若没有参数，则不要执行originMethod
-            return func(args.length>0 ? originMethod(...args):originMethod)
+            console.log('args=',args)
+            return func(withId(id)(args.length>0 ? originMethod(...args):originMethod))
           };
         }
       };
       return new Proxy(obj, handler);
     }
 
+    //测试没有id的情况
+    state=0
+    let Counter = interceptObject(counter,setState);
     Counter.increment()
-    expect(state).toBe(1)
+    expect(state).toEqual(1)
     Counter.add(2)
-    expect(state).toBe(3)
+    expect(state).toEqual(3)
+
+    //测试id为counter的情况
+  
+    state={counter:0}
+    let leftCounter = interceptObject(counter,setState,'counter');
+    leftCounter.increment()
+    expect(state).toEqual({counter:1})
+    leftCounter.add(2)
+    expect(state).toEqual({counter:3})
+
+    state={leftCounter:0}
+    let secondCounter = interceptObject(counter,setState,'secondCounter');
+    secondCounter.increment();
+    console.log('state of second Counter is:',state)
+    secondCounter.add(2)
+    console.log('state of second Counter is:',state)
+
+  
+
+    // expect(secondCounter)
+    // Counter.increment()
+    // expect(state).toBe(1)
+    // Counter.add(2)
+    // expect(state).toBe(3)
   })
 
 
