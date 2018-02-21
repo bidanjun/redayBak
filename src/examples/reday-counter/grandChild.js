@@ -1,13 +1,19 @@
 import React from 'react'
 import {store,useState} from '../../reday'
 
+import {counter} from './counter.state'
+
+// 纯手工的方式处理id:
+// handleDecrement:()=>{
+//   return store.Counter.setState((state)=>({counter:counter.decrement(state.counter)}))
+// }
+
 export default useState(()=>{
   console.log('enter mapProps');
   return {
     counterValue:store.Counter.state.counter,
     handleDecrement:()=>{
-      console.log('click button now,increment is:',store.Counter.counter.increment)
-      return store.Counter.counter.decrement()
+      return store.Counter.setState((state)=>({counter:counter.decrement(state.counter)}))
     }
   }
 })( (props)=>{
