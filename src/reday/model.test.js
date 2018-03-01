@@ -1,4 +1,4 @@
-import Counter from '../demo/counter';
+import Counter from '../examples/reday-counter/counter.state';
 
 describe('Model', () => {
   it('proxy should instead the origin object', () => {
