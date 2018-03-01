@@ -37,7 +37,6 @@ export class Router extends React.Component {
           window.location.pathname + window.location.search + '#' + newURI
         );
       }
-      console.log('goto')
     }
 
     createElement(Handler, props) {

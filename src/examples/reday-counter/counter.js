@@ -26,7 +26,6 @@ const counter=new counterModel() //默认为'counter'
 export default compose(  
   makeState('Counter',store,null,{counter}),
   useState(()=>{
-    console.log('enter mapProps,store.Counter.counter=',store.Counter.counter,'store.Counter.state=',store.Counter.state);
     return {
       counterValue:store.Counter.state.counter,
       handleIncrement:()=>store.Counter.counter.setState(store.Counter.counter.increment)
