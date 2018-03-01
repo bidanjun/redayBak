@@ -38,6 +38,23 @@ export const createState = (getComponent=null,initialState,initialModels, asyncA
       super(props, context); // we couldn't use this before super(props,context)
 
       this.state = initialState ? initialState : {}
+      
+      const modelIds = Object.keys(initialModels) //数组，每个action的名字
+      modelIds.forEach((modelName)=>{
+        this[modelName]=initialModels[modelName]; //这样将每个变量，按原来的名字保存在组件的this指针，便于访问
+      })
+      // 这里处理model的initialState,并将model保存在this指针
+      initialModels.forEach((model)=>{
+        
+        //需要得到model的变量名
+
+        if (!!model.fieldId)
+          this.state = {[model.fieldId]:model.initialState, ...this.state}
+        else this.state = {...this.state,...model.initialState}
+      })
+
+
+      this.initialAction=asyncAction; //这里保存，以便刷新
       registerThis(this); //if it has stateName,we'll register it in the storeObject
 
 
@@ -85,18 +102,18 @@ export const createState = (getComponent=null,initialState,initialModels, asyncA
 
 //the default makeState hoc
 //if you provider a asyncAction,that mean we'll excute it at componentDidMount
-export default (initialState, stateName, storeObject = store,asyncAction=null)=>WrappedComponent =>
-  createState(initialState,(comp)=>{
+export default (stateName, storeObject = store,initialState,initialModels, asyncAction=null,useState = true)=>WrappedComponent =>
+  createState((comp)=>{
     if (stateName)
       storeObject[stateName]=comp;
-  },asyncAction,true)(WrappedComponent) //notice here,we must use the WrappedComponent as argument
+  },initialState,initialModels, asyncAction,useState)(WrappedComponent) //notice here,we must use the WrappedComponent as argument
 
 // here,we only provider state from asyncState
 export const makeAsyncState = (asyncAction,stateName, storeObject = store)=>WrappedComponent =>
-  createState({},(comp)=>{
+  createState((comp)=>{
     if (stateName)
       storeObject[stateName]=comp;
-  },asyncAction,true)(WrappedComponent) //must have WrappedComponent here
+  },null,null, asyncAction,true)(WrappedComponent) //must have WrappedComponent here
 
 // get the state of a component,and register to store
 export const registerState= (stateName=null,storeObject=store)=>(WrappedComponent)=> {
