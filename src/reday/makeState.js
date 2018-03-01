@@ -1,11 +1,9 @@
 import React, { Component } from 'react'
 
+// 要点1：makeState可以同时返回组件和组件指针,return{component,thisOfComponent}
+// export app=makeState,app.Render(wrappedComponent)和app.component.state
 // default store,you could made other store same way
 export const store = {};
-
-
-
-
 
 // register component with state to a store
 export const registerThis = (comp, stateName = null, storeObject = store) => {
@@ -44,13 +42,14 @@ export const createState = (getComponent=null,initialState,initialModels, asyncA
         this[modelName]=initialModels[modelName]; //这样将每个变量，按原来的名字保存在组件的this指针，便于访问
       })
       // 这里处理model的initialState,并将model保存在this指针
-      initialModels.forEach((model)=>{
+      modelIds.forEach((model)=>{
         
         //需要得到model的变量名
 
-        if (!!model.fieldId)
-          this.state = {[model.fieldId]:model.initialState, ...this.state}
-        else this.state = {...this.state,...model.initialState}
+        if (!!this[model].fieldId)
+          this.state = {[this[model].fieldId]:this[model].initialState, ...this.state}
+        else this.state = {...this.state,...this[model].initialState}
+        this[model].bindToComponent(this);
       })
 
 

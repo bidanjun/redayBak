@@ -4,10 +4,12 @@
 // setState(()=>temp)
 
 const actionWithField=(fieldId)=>(action)=>(state,props)=>{
+
+  //这里不应该用...展开，由于state[counter]=0，不是object，根本不可能展开
   if (!!fieldId)
-    return ({ [fieldId]: { ...state[fieldId], ...action(state[fieldId], props)}})
+    return ({ [fieldId]: action(state[fieldId], props)}) //这样就可以了，为action增加fieldId判断
   else
-    return {...action(state, props)}
+    return action(state, props)
 }
 // initialState // 初始状态
 // initialAction不需要，这是创建组件的时候提供的，didmounted中一次性的执行
@@ -49,13 +51,19 @@ export default class Model {
 
     bindToComponent=(comp)=>{
       this.component=comp;
-      this.setState = comp.setState;
     }
 
     //这里调用组件的setState,但处理fieldId问题
     //model自带fieldId，则无需利用model的变量名,也无需提供代理
-    setState=(action)=>(this.component.setState(actionWithField(this.fieldId)(action))) //这里这么处理
-
+    setState=(action)=>{
+      console.log('enter setState!fieldId=',this.fieldId)
+      console.log('state is:',this.component.state)
+      if (!!this.fieldId) {
+        this.component.setState(actionWithField(this.fieldId)(action))
+      }
+      else this.component.setState(action)
+    }
+      //这里这么处理
   }
   
   // 快速创建一个model,这里没有定制的业务逻辑，仅仅用setState(action)处理状态变更
