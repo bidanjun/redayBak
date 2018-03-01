@@ -26,7 +26,9 @@ export const registerThis = (comp, stateName = null, storeObject = store) => {
 // useState is true by default,will map all state to child's props
 // asyncActions is a function that return a promise,if it's not null ,it will be exceute
 // in componentDidMount,and we'll add pending and error,data states to the state
-export const createState = (initialState, getComponent=null,asyncAction=null,useState = true) => WrappedComponent => {
+// initialModels是一个对象 {counter,leftCounter,rightCounter}
+// initialState是一个对象，提供初始的
+export const createState = (getComponent=null,initialState,initialModels, asyncAction=null,useState = true) => WrappedComponent => {
 
   return class State extends Component {
 
