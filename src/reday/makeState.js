@@ -42,15 +42,17 @@ export const createState = (getComponent=null,initialState,initialModels, asyncA
         this[modelName]=initialModels[modelName]; //这样将每个变量，按原来的名字保存在组件的this指针，便于访问
       })
       // 这里处理model的initialState,并将model保存在this指针
+      let prevState={}
       modelIds.forEach((model)=>{
         
         //需要得到model的变量名
 
         if (!!this[model].fieldId)
-          this.state = {[this[model].fieldId]:this[model].initialState, ...this.state}
-        else this.state = {...this.state,...this[model].initialState}
+          prevState = {[this[model].fieldId]:this[model].initialState, ...this.state}
+        else prevState = {...this.state,...this[model].initialState}
         this[model].bindToComponent(this);
       })
+      this.state={...prevState};
 
 
       this.initialAction=asyncAction; //这里保存，以便刷新
